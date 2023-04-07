@@ -20,7 +20,6 @@ jobs:
           name: TPX3.exe
           path: cheetah/build/TPX3.exe
 
-jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:

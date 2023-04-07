@@ -14,7 +14,7 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          msbuild
+          msbuild .\TPX3.vcxproj /p:configuration=Release
       - uses: actions/upload-artifact@v3
         with: 
           name: TPX3.exe
@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. 
+          cmake .. -D CMAKE_BUILD_TYPE=Release
           make
       - uses: actions/upload-artifact@v3
         with: 

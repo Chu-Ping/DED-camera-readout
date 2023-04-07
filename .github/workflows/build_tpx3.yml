@@ -1,10 +1,25 @@
 name: CMake Build TPX3
 on: [push]
-# jobs:
-#   build-windows:
-#     runs-on: windows-latest
-#     steps:
-#       - uses: actions/checkout@v3
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_x86
+      - name: build
+        working-directory: cheetah/
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          msbuild
+      - uses: actions/upload-artifact@v3
+        with: 
+          name: TPX3.exe
+          path: cheetah/build/TPX3.exe
+
 jobs:
   build-linux:
     runs-on: ubuntu-latest
@@ -13,10 +28,14 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y build-essential cmake
       - name: build
         working-directory: cheetah/
-        run: mkdir build && cd build && cmake .. && make
+        run: |
+          mkdir build
+          cd build
+          cmake .. 
+          make
       - uses: actions/upload-artifact@v3
         with: 
           name: TPX3.out
-          path: cheetah/build/
+          path: cheetah/build/TPX3.out
 
 

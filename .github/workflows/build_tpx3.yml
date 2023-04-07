@@ -18,7 +18,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with: 
           name: TPX3.exe
-          path: cheetah/build/TPX3.exe
+          path: cheetah/build/Release
 
   build-linux:
     runs-on: ubuntu-latest
@@ -35,6 +35,6 @@ jobs:
       - uses: actions/upload-artifact@v3
         with: 
           name: TPX3.out
-          path: cheetah/build/TPX3.out
+          path: cheetah/build/TPX3
 
 

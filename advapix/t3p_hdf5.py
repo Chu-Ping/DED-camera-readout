@@ -30,7 +30,7 @@ def make_4d(fname, dwell_time, line_shape, detector_shape, bin_real, bin_det, ra
     while not b_finish:
         print(i_c)
         pre_check = np.fromfile(fname, dtype=dt,count=1,offset=int(1e7*(i_c+1))*dt.itemsize)
-        if pre_check['toa']//dwell_time//line_shape >=range[2]:
+        if (pre_check['toa']*25//dwell_time//line_shape >=range[2]) or not (pre_check.size>0):
             if pre_pacbed is None:
                 pre_data = np.fromfile(fname, dtype=dt,count=int(1e8),offset=int(1e7*(i_c+1))*dt.itemsize)
                 pre_pacbed = np.zeros(detector_shape)
@@ -46,7 +46,7 @@ def make_4d(fname, dwell_time, line_shape, detector_shape, bin_real, bin_det, ra
             }
             del d
             b_finish = (data['ry']>=range[3] ).all()
-            if b_finish or not data:
+            if b_finish or not (data.size>0):
                 break
             b_stay = ((data['rx']>=range[0]) & (data['rx']<range[1])) & ((data['ry']>=range[2]) & (data['ry']<range[3]))
 
@@ -154,9 +154,9 @@ name_save = None # None: generated from parameter
 scan_shape = (2049, 2048)
 detector_shape = (256, 256)
 dwell_time = 1000
-bin_real = 4
+bin_real = 2
 bin_det = 4
-scan_crop = None # None: full range
+scan_crop = (0,1000,1000,2000) # None: full range
 rot = 0 # in rad
 ##################################################################################################
 
@@ -168,7 +168,7 @@ comxy = com(ds)
 ricom = compute_ricom(comxy[0], comxy[1], 5)
 
 if name_save is None:
-    name_save = name_t3p[:-4] + '_'\
+    name_save = name_t3p[:-4] + '_' +\
         str(scan_shape[0]) +'x'+ str(scan_shape[1]) +'x'+ \
         str(detector_shape[0]) +'x'+ str(detector_shape[1]) +\
         '_bin' + str(bin_real) +'-'+ str(bin_det) +\

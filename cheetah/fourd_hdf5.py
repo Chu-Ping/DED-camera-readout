@@ -27,7 +27,7 @@ def make_4d(fname, detector_shape, bin_real, bin_det, range, rot):
     while not b_finish:
         print(i_c)
         pre_check = np.fromfile(fname, dtype=dt,count=1,offset=int(1e7*(i_c+1))*dt.itemsize)
-        if pre_check['ry'] >=range[2]:
+        if pre_check['ry'] >=range[2] or not (pre_check.size>0):
 
             if pre_pacbed is None:
                 pre_data = np.fromfile(fname, dtype=dt,count=int(1e8),offset=int(1e7*(i_c+1))*dt.itemsize)
@@ -38,7 +38,7 @@ def make_4d(fname, detector_shape, bin_real, bin_det, range, rot):
             data = np.fromfile(fname, dtype=dt,count=int(1e7),offset=int(1e7*i_c)*dt.itemsize)
             b_within = data['ry']<range[3]
             b_finish = ~(b_within.all())
-            if b_finish or not data:
+            if b_finish or not (data.size>0):
                 break
             b_range = ((data['rx']>=range[0]) & (data['rx']<range[1])) & ((data['ry']>=range[2]) & (data['ry']<range[3]))
             b_seam = ((data['kx']!=255) & (data['kx']!=256)) & ((data['ky']!=255) & (data['ky']!=256))

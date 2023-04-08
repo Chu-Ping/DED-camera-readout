@@ -168,7 +168,7 @@ comxy = com(ds)
 ricom = compute_ricom(comxy[0], comxy[1], 5)
 
 if name_save is None:
-    name_save = name_t3p[:-4] + '_'\
+    name_save = name_t3p[:-4] + '_' +\
         str(scan_shape[0]) +'x'+ str(scan_shape[1]) +'x'+ \
         str(detector_shape[0]) +'x'+ str(detector_shape[1]) +\
         '_bin' + str(bin_real) +'-'+ str(bin_det) +\

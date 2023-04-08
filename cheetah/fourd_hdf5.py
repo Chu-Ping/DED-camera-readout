@@ -38,7 +38,7 @@ def make_4d(fname, detector_shape, bin_real, bin_det, range, rot):
             data = np.fromfile(fname, dtype=dt,count=int(1e7),offset=int(1e7*i_c)*dt.itemsize)
             b_within = data['ry']<range[3]
             b_finish = ~(b_within.all())
-            if b_finish:
+            if b_finish or not data:
                 break
             b_range = ((data['rx']>=range[0]) & (data['rx']<range[1])) & ((data['ry']>=range[2]) & (data['ry']<range[3]))
             b_seam = ((data['kx']!=255) & (data['kx']!=256)) & ((data['ky']!=255) & (data['ky']!=256))
@@ -159,7 +159,7 @@ if scan_crop is None:
 ds, pacbed, pacbed_binned = make_4d(dir+name_fourd, detector_shape, bin_real, bin_det, scan_crop, rot)
 
 if name_save is None:
-    name_save = name_fourd[:-4] + \
+    name_save = name_fourd[:-4] + '_' +\
         str(scan_shape[0]) +'x'+ str(scan_shape[1]) +'x'+ \
         str(detector_shape[0]) +'x'+ str(detector_shape[1]) +\
         '_bin' + str(bin_real) +'-'+ str(bin_det) +\

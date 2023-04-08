@@ -46,7 +46,7 @@ def make_4d(fname, dwell_time, line_shape, detector_shape, bin_real, bin_det, ra
             }
             del d
             b_finish = (data['ry']>=range[3] ).all()
-            if b_finish:
+            if b_finish or not data:
                 break
             b_stay = ((data['rx']>=range[0]) & (data['rx']<range[1])) & ((data['ry']>=range[2]) & (data['ry']<range[3]))
 
@@ -168,7 +168,7 @@ comxy = com(ds)
 ricom = compute_ricom(comxy[0], comxy[1], 5)
 
 if name_save is None:
-    name_save = name_t3p[:-4] + \
+    name_save = name_t3p[:-4] + '_'\
         str(scan_shape[0]) +'x'+ str(scan_shape[1]) +'x'+ \
         str(detector_shape[0]) +'x'+ str(detector_shape[1]) +\
         '_bin' + str(bin_real) +'-'+ str(bin_det) +\

@@ -132,7 +132,7 @@ def compute_ricom(comx, comy, kernel_size):
     yy /= zz
     xx[zz==0] = 0
     yy[zz==0] = 0
-    ricom = fft2d(comx) * fft2d(-xx) + fft2d(comy) * fft2d(-yy)
+    ricom = fft2d(comx) * fft2d(xx) + fft2d(comy) * fft2d(yy)
     ricom = np.real(ifft2d(ricom))
     return ricom
 

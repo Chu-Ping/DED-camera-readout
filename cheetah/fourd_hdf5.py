@@ -100,10 +100,9 @@ def safe_div(a,b):
 def com(data):
     ramp = np.arange(data.shape[-1])
     dose = data.sum((-2,-1))
-    com = [
-        safe_div((data*ramp[:,np.newaxis]).sum((-2,-1)), dose) - data.shape[-2]//2,
-        safe_div((data*ramp).sum((-2,-1)), dose) - data.shape[-1]//2
-    ]
+    comx = safe_div((data.sum(-1)*ramp).sum(-1),dose) - data.shape[-2]//2
+    comy = safe_div((data.sum(-2)*ramp).sum(-1),dose) - data.shape[-1]//2
+    com = [comx, comy]
     if len(data.shape)==4:
         com[0][dose==0] = 0
         com[1][dose==0] = 0    

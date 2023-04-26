@@ -47,29 +47,27 @@ PACK(struct dtype_4d
         uint16_t rx;
         uint16_t ry;
     });
-
+PACK(struct dtype_5d
+    {
+        uint16_t kx;
+        uint16_t ky;
+        uint16_t rx;
+        uint16_t ry;
+        uint64_t toa;
+    });
 
 
 class TPX3
 {
 public:
-    void openFile_event(std::string file, std::string path);
-    void openFile_4d(std::string file);
-    void openFile_csr(std::string file, std::string path);
+    void openFile(std::string file);
     void closeFile();
-    void process_event();
-    void process_4d(uint16_t pix_per_line);
-    void process_csr(uint16_t pix_per_line);
+    void process(uint16_t pix_per_line, bool timestamp);
     TPX3(){};
 
 private:
     std::ifstream file_raw;
-    std::ofstream file_tdc;
     std::ofstream file_event;
-    std::ofstream file_4d;
-    std::ofstream file_val;
-    std::ofstream file_col;
-    std::ofstream file_row;
     std::uintmax_t file_size;
     std::uintmax_t pos;
 
@@ -87,20 +85,18 @@ private:
     dtype_tdc tdc;
     dtype_event event;
     dtype_4d fourd;
+    dtype_5d fived;
     uint64_t packet;
     size_t header_size{ sizeof(header) };
-    size_t tdc_size{ sizeof(tdc) };
-    size_t event_size{ sizeof(event) };
     size_t packet_size{ sizeof(packet) };
     size_t fourd_size{ sizeof(fourd) };
+    size_t fived_size{ sizeof(fived) };
 
     void resetFile();
     void read(char *buffer, size_t buffer_size);
     uint8_t isTdc();
-    void writeTdc();
-    void writeEvent();
     void write4d(dtype_event* event_ptr, uint16_t pix_per_line);
-    void writeCsr(dtype_event* event_ptr, uint16_t pix_per_line);
+    void write5d(dtype_event* event_ptr, uint16_t pix_per_line);
     void updateEvent(dtype_event* event_ptr);
     bool updateLine();
     void toa_2_pos(uint64_t toa, uint16_t pix_per_line, uint16_t* pos_ptr);

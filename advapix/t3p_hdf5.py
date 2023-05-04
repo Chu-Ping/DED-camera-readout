@@ -131,7 +131,7 @@ def compute_ricom(comx, comy, kernel_size):
     yy /= zz
     xx[zz==0] = 0
     yy[zz==0] = 0
-    ricom = fft2d(comx) * fft2d(xx) + fft2d(comy) * fft2d(yy)
+    ricom = fft2d(comx) * fft2d(-xx) + fft2d(comy) * fft2d(-yy)
     ricom = np.real(ifft2d(ricom))
     return ricom
 
@@ -163,9 +163,6 @@ if scan_crop is None:
     scan_crop = (0,scan_shape[0],0,scan_shape[1])
 ds, pacbed, pacbed_binned = make_4d(dir+name_t3p, dwell_time, scan_shape[0], detector_shape, bin_real, bin_det, scan_crop, rot)
 
-comxy = com(ds)
-ricom = compute_ricom(comxy[0], comxy[1], 5)
-
 if name_save is None:
     name_save = name_t3p[:-4] + '_' +\
         str(scan_shape[0]) +'x'+ str(scan_shape[1]) +'x'+ \
@@ -176,6 +173,5 @@ if name_save is None:
         '_rot' + str(rot) 
 
     
-save_h5(ds, pacbed_binned, dir, name_save + '.h5')
-save_h5(np.transpose(ds, (1,0,3,2)), np.transpose(pacbed_binned,(1,0)), dir, name_save+'_swap.h5')
-
+save_h5(np.transpose(ds, (1,0,2,3)), np.transpose(pacbed_binned,(1,0)), dir, name_save+'_swapR.h5')
+# this is the format for CNN, notice at the second position, the probe is given by the pacbed, this is not ideal, and user should make their own probe image.

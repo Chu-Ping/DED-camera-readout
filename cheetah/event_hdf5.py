@@ -166,9 +166,7 @@ if name_save is None:
         str(scan_crop[2]) +'-'+ str(scan_crop[3]) +\
         '_rot' + str(rot) 
 
-comxy = com(ds)
-ricom = compute_ricom(comxy[0], comxy[1], 3)
+save_h5(np.transpose(ds, (1,0,2,3)), np.transpose(pacbed_binned,(1,0)), dir, name_save+'_swapR.h5') 
+# this is the format for CNN, notice at the second position, the probe is given by the pacbed, this is not ideal, and user should make their own probe image.
 
-save_h5(ds, pacbed_binned, dir, name_save + '.h5')
-save_h5(np.transpose(ds, (1,0,3,2)), np.transpose(pacbed_binned,(1,0)), dir, name_save+'_swap.h5')
 

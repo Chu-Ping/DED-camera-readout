@@ -37,7 +37,7 @@ def make_4d(fname, detector_shape, bin_real, bin_det, range, rot):
 
             data = np.fromfile(fname, dtype=dt,count=int(1e7),offset=int(1e7*i_c)*dt.itemsize)
             b_within = data['ry']<range[3]
-            b_finish = ~(b_within.all())
+            b_finish = ~(b_within.any())
             if b_finish or not (data.size>0):
                 break
             b_range = ((data['rx']>=range[0]) & (data['rx']<range[1])) & ((data['ry']>=range[2]) & (data['ry']<range[3]))

@@ -37,7 +37,7 @@ def make_4d(fname, detector_shape, bin_real, bin_det, range, rot):
 
             data = np.fromfile(fname, dtype=dt,count=int(1e7),offset=int(1e7*i_c)*dt.itemsize)
             b_within = data['ry']<range[3]
-            b_finish = ~(b_within.all())
+            b_finish = ~(b_within.any())
             if b_finish or not (data.size>0):
                 break
             b_range = ((data['rx']>=range[0]) & (data['rx']<range[1])) & ((data['ry']>=range[2]) & (data['ry']<range[3]))
@@ -138,14 +138,14 @@ def save_h5(ds, pacbed, dir, name):
 
 ######################################## USER INPUT ##############################################
 # files
-dir = "/mnt/B2C2DD54C2DD1E03/data/20230317/Measurement_mrt_17_2023_16h58m03s/raw/"
-name_fourd = 'fourd.dat'
+dir = "/mnt/B2C2DD54C2DD1E03/data/20230424/Measurement_apr_24_2023_18h48m51s/raw/"
+name_fourd = 'event.dat'
 name_save = None # None: generated from parameter 
 
 # parameter
 scan_shape = (2048, 2048)
 detector_shape = (512, 512)
-bin_real = 3
+bin_real = 8
 bin_det = 8
 scan_crop = None # None: full range
 rot = 0 # in rad
@@ -155,7 +155,7 @@ rot = 0 # in rad
 if scan_crop is None:
     scan_crop = (0,scan_shape[0],0,scan_shape[1])
 
-ds, pacbed, pacbed_binned = make_4d(dir+name_fourd, detector_shape, bin_real, bin_det, scan_crop, rot)
+ds0, pacbed, pacbed_binned = make_4d(dir+name_fourd, detector_shape, bin_real, bin_det, scan_crop, rot)
 
 if name_save is None:
     name_save = name_fourd[:-4] + '_' +\
@@ -166,9 +166,16 @@ if name_save is None:
         str(scan_crop[2]) +'-'+ str(scan_crop[3]) +\
         '_rot' + str(rot) 
 
+ds = np.transpose(ds0, (0,1,3,2))
+ds = np.flip(ds, (0,1))
 comxy = com(ds)
-ricom = compute_ricom(comxy[0], comxy[1], 3)
+ricom = compute_ricom(comxy[0], comxy[1], 2)
+a=10
+plt.figure()
+plt.imshow(ricom)
+plt.show(block=False)
+
 
 save_h5(ds, pacbed_binned, dir, name_save + '.h5')
-save_h5(np.transpose(ds, (1,0,3,2)), np.transpose(pacbed_binned,(1,0)), dir, name_save+'_swap.h5')
+save_h5(np.transpose(ds, (1,0,2,3)), pacbed_binned, dir, name_save+'_swapR.h5')
 

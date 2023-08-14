@@ -1,3 +1,19 @@
+/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
+ * University of Antwerp - All Rights Reserved. 
+ * You may use, distribute and modify
+ * this code under the terms of the GPL3 license.
+ * You should have received a copy of the GPL3 license with
+ * this file. If not, please visit: 
+ * https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * Authors: 
+ *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
+ *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
+ */
+
+
+#ifndef TPX3READER_H
+#define TPX3READER_h
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -5,100 +21,88 @@
 #include <array>
 #include <vector>
 
-#ifndef TPX3READER_H
-#define TPX3READER_h
 
-#ifdef __GNUC__
-#define PACK(__Declaration__) __Declaration__ __attribute__((__packed__))
-#endif
-
-#ifdef _MSC_VER
-#define PACK(__Declaration__) __pragma(pack(push, 1)) __Declaration__ __pragma(pack(pop))
-#endif
-
-
-PACK(struct dtype_header
-    {
-        uint8_t tee;
-        uint8_t pee;
-        uint8_t ax;
-        uint8_t three;
-        uint8_t chipindex;
-        uint8_t reserved;
-        uint16_t chunksize;
-    });
-PACK(struct dtype_event
-    {
-        uint8_t kx;
-        uint8_t ky;
-        uint64_t toa;
-        uint8_t chip;
-    });
-PACK(struct dtype_tdc
-    {
-        uint8_t trigger;
-        uint64_t toa;
-        uint8_t chip;
-    });
-PACK(struct dtype_4d
+const size_t PRELOC_SIZE = 4000*25;
+struct dtype_4d
     {
         uint16_t kx;
         uint16_t ky;
         uint16_t rx;
         uint16_t ry;
-    });
-PACK(struct dtype_5d
+    };
+struct dtype_5d
     {
         uint16_t kx;
         uint16_t ky;
         uint16_t rx;
         uint16_t ry;
         uint64_t toa;
-    });
+    };
+
 
 
 class TPX3
 {
-public:
-    void openFile(std::string file);
-    void closeFile();
-    void process(uint16_t pix_per_line, bool timestamp);
-    TPX3(){};
-
 private:
+    // process buffer
+    bool proc_started = false;
+    int preloc_size = PRELOC_SIZE;
+    std::array<uint64_t, PRELOC_SIZE>buffer;
+
+    // Data
+    uint64_t packet;
+    uint64_t probe_position;
+    uint64_t toa;
+    uint64_t rise_t[4];
+    uint64_t fall_t[4];
+    bool rise_fall[4] = {false, false, false, false};
+    int line_count[4] = {0, 0, 0, 0};
+    int total_line = 0;
+    uint64_t line_interval;
+    uint64_t dwell_time;
+    bool started = false;
+
+    // Chip
+    int chip_id;
+    uint64_t tpx_header = 861425748; //(b'TPX3', 'little')
+    int address_multiplier[4] = {1,-1,-1,1};
+    int address_bias_x[4] = {256, 511, 255, 0};
+    int address_bias_y[4] = {0, 511, 511, 0};
+
+    // File
     std::ifstream file_raw;
     std::ofstream file_event;
     std::uintmax_t file_size;
-    std::uintmax_t pos;
+    std::uintmax_t pos=0;
 
-    unsigned int pixaddr : 20;
-    uint64_t toa;
+    // Method
+    void openFile();
+    void closeFile();
+    void read();
+    void process();
+    int which_type(uint64_t *packet);
+    void process_tdc(uint64_t *packet);
+    void write(uint64_t *packet, dtype_5d &data);
+    void write(uint64_t *packet, dtype_4d &data);
+    void run();
 
-    uint64_t risetime[4];
-    uint64_t falltime[4];
-    bool risefall[4] = {false, false, false, false};
-    int event_count[4] = {0,0,0,0};
-    int line_count[4] = {-1,-1,-1,-1};
-    std::vector<std::vector<dtype_event>> event_line = std::vector<std::vector<dtype_event>>(4, std::vector<dtype_event>(1000000));    
 
-    dtype_header header;
-    dtype_tdc tdc;
-    dtype_event event;
-    dtype_4d fourd;
-    dtype_5d fived;
-    uint64_t packet;
-    size_t header_size{ sizeof(header) };
-    size_t packet_size{ sizeof(packet) };
-    size_t fourd_size{ sizeof(fourd) };
-    size_t fived_size{ sizeof(fived) };
+public:
+    // File
+    std::string file;
+    uint16_t scan_x;
+    uint16_t scan_y;
+    bool timestamp;
 
-    void resetFile();
-    void read(char *buffer, size_t buffer_size);
-    uint8_t isTdc();
-    void write4d(dtype_event* event_ptr, uint16_t pix_per_line);
-    void write5d(dtype_event* event_ptr, uint16_t pix_per_line);
-    void updateEvent(dtype_event* event_ptr);
-    bool updateLine();
-    void toa_2_pos(uint64_t toa, uint16_t pix_per_line, uint16_t* pos_ptr);
+
+    TPX3(std::string file, uint16_t scan_x, bool timestamp){
+        this->file = file;
+        this->scan_x = scan_x;
+        this->scan_y = scan_x;
+        this->timestamp = timestamp;
+        this->run();
+    }
+
+
 };
 #endif

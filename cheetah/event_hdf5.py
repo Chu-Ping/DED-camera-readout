@@ -100,34 +100,44 @@ def safe_div(a,b):
 def com(data):
     ramp = np.arange(data.shape[-1])
     dose = data.sum((-2,-1))
-    comx = safe_div((data.sum(-1)*ramp).sum(-1),dose) - data.shape[-2]//2
-    comy = safe_div((data.sum(-2)*ramp).sum(-1),dose) - data.shape[-1]//2
+    avgx = safe_div((data.sum(-1)*ramp).sum(),dose.sum())
+    avgy = safe_div((data.sum(-2)*ramp).sum(),dose.sum())
+    comx = safe_div((data.sum(-1)*ramp).sum(-1),dose) - avgx
+    comy = safe_div((data.sum(-2)*ramp).sum(-1),dose) - avgy
     com = [comx, comy]
     if len(data.shape)==4:
         com[0][dose==0] = 0
         com[1][dose==0] = 0    
     return com
 
+def insertCenter(arr_big, arr_small, b_reverse=False):
+    bx, by = arr_big.shape
+    sx, sy = arr_small.shape
+    arr_big = arr_big.astype(arr_small.dtype)
+    if b_reverse:
+        return arr_big[bx//2-sx//2 : bx//2+(sx-1)//2+1, 
+            by//2-sy//2 : by//2+(sy-1)//2+1]
+    else:
+        arr_big[bx//2-sx//2 : bx//2+(sx-1)//2+1, 
+            by//2-sy//2 : by//2+(sy-1)//2+1] = arr_small
+        return arr_big
+
 def compute_ricom(comx, comy, kernel_size):
-    template = np.zeros(comx.shape)
+    template = np.zeros((comx.shape[0]*2, comx.shape[1]*2))
     x = np.linspace(-0.5, 0.5, kernel_size*2+1, endpoint=True)
     _xx, _yy = np.meshgrid(x,x)
-    xx = np.copy(template)
-    yy = np.copy(template)
-    xx[ xx.shape[0]//2-kernel_size:xx.shape[0]//2+kernel_size+1,
-        xx.shape[1]//2-kernel_size:xx.shape[1]//2+kernel_size+1
-        ] = _xx
-    yy[ yy.shape[0]//2-kernel_size:yy.shape[0]//2+kernel_size+1,
-        yy.shape[1]//2-kernel_size:yy.shape[1]//2+kernel_size+1
-        ] = _yy
+    xx = insertCenter(np.copy(template), _xx)
+    yy = insertCenter(np.copy(template), _yy)
     zz = xx**2 + yy**2
     xx /= zz
     yy /= zz
     xx[zz==0] = 0
     yy[zz==0] = 0
-    ricom = fft2d(comx) * fft2d(-xx) + fft2d(comy) * fft2d(-yy)
+    fcomx = fft2d(insertCenter(np.copy(template), comx))
+    fcomy = fft2d(insertCenter(np.copy(template), comy))
+    ricom = fcomx * fft2d(-xx) + fcomy * fft2d(-yy)
     ricom = np.real(ifft2d(ricom))
-    return ricom
+    return insertCenter(ricom, comx, True)
 
 def save_h5(ds, pacbed, dir, name):
     f = h5py.File(dir+'/'+name, 'w')

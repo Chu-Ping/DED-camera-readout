@@ -139,8 +139,8 @@ void TPX3::write(uint64_t* packet, dtype_5d &data)
                 (pack_44 & 0x00003)) +
             address_bias_y[chip_id]);
         data.toa = ((((*packet) & 0xFFFF) << 14) + (((*packet) >> (16 + 14)) & 0x3FFF) << 4) - (((*packet) >> 16) & 0xF);
+        file_event.write((const char*)&data, sizeof(data));
     }
-    file_event.write((const char*)&data, sizeof(data));
 }
 
 void TPX3::write(uint64_t* packet, dtype_4d &data)
@@ -162,8 +162,8 @@ void TPX3::write(uint64_t* packet, dtype_4d &data)
                 (((pack_44 & 0x001F8) >> 1) +
                 (pack_44 & 0x00003)) +
             address_bias_y[chip_id]);
+        file_event.write((const char*)&data, sizeof(data));
     }
-    file_event.write((const char*)&data, sizeof(data));
 }
 
 

@@ -30,13 +30,14 @@ struct dtype_4d
         uint16_t rx;
         uint16_t ry;
     };
-struct dtype_5d
+struct dtype_full
     {
         uint16_t kx;
         uint16_t ky;
         uint16_t rx;
         uint16_t ry;
         uint64_t toa;
+        uint64_t tot;
     };
 
 
@@ -82,7 +83,7 @@ private:
     void process();
     int which_type(uint64_t *packet);
     void process_tdc(uint64_t *packet);
-    void write(uint64_t *packet, dtype_5d &data);
+    void write(uint64_t *packet, dtype_full &data);
     void write(uint64_t *packet, dtype_4d &data);
     void run();
 

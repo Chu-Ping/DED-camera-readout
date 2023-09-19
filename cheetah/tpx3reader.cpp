@@ -48,13 +48,13 @@ void TPX3::read()
 void TPX3::process(){
     int type;
     dtype_4d data4;
-    dtype_5d data5;
+    dtype_full dataf;
 
     for (int j = 0; j < PRELOC_SIZE; j++){
         type = which_type(&buffer[j]);
         if ((type == 2) & rise_fall[chip_id] & (line_count[chip_id] != 0)){
             if (timestamp){
-                write(&buffer[j], data5);
+                write(&buffer[j], dataf);
             }
             else{
                 write(&buffer[j], data4);
@@ -63,7 +63,7 @@ void TPX3::process(){
         }
     }
     if (timestamp) {
-        std::cout << data5.ry << std::endl;
+        std::cout << dataf.ry << std::endl;
 
     }
     else{
@@ -119,7 +119,7 @@ void TPX3::process_tdc(uint64_t *packet)
     }
 }
 
-void TPX3::write(uint64_t* packet, dtype_5d &data)
+void TPX3::write(uint64_t* packet, dtype_full &data)
 {
     toa = (((*packet & 0xFFFF) << 14) + ((*packet >> 30) & 0x3FFF)) << 4;
     probe_position = ( toa - (rise_t[chip_id] * 2)) / dwell_time;
@@ -139,6 +139,7 @@ void TPX3::write(uint64_t* packet, dtype_5d &data)
                 (pack_44 & 0x00003)) +
             address_bias_y[chip_id]);
         data.toa = ((((*packet) & 0xFFFF) << 14) + (((*packet) >> (16 + 14)) & 0x3FFF) << 4) - (((*packet) >> 16) & 0xF);
+        data.tot = ((*packet) >> (16 + 4)) & 0x3ff;
         file_event.write((const char*)&data, sizeof(data));
     }
 }

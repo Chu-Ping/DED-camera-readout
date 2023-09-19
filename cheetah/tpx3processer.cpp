@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
         file = argv[1];
         length = std::stoi(argv[2]);
         std::string timestamp_arg = argv[3];
-        if (timestamp_arg == "true"){
+        if (timestamp_arg == "full"){
             timestamp = true;
         } else {
             timestamp = false;
